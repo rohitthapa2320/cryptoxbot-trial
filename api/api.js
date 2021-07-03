@@ -1,5 +1,7 @@
 const axios= require('axios');
-const ticker= require('../models/tickers');
+// const ticker= require('../models/tickers');
+
+const Ticker= require('../models/tickers');
 
 const URL = 'https://api-pub.bitfinex.com/v2';
 
@@ -18,15 +20,27 @@ const getTickers = async (symbols) => {
 
     console.log(tickerData);
 
-    const newTicker= new ticker(tickerData);
+    // const newTicker= new ticker(tickerData);
 
     try {
-         await newTicker.save();
+        //  await newTicker.save();
+
+        Ticker.create(tickerData);
 
          tickersArray.push(tickerData);
     } catch (error) {
         console.log("Error message: ", error);
     }
+
+    // Ticker.create({SYMBOL,BID, BID_SIZE, ASK, 
+    // ASK_SIZE,DAILY_CHANGE, DAILY_CHANGE_RELATIVE, LAST_PRICE, VOLUME, HIGH,LOW})
+    // .then((result) => {
+    //   console.log(result);
+    // }).catch((err) => {
+    //   console.log(err);
+    // });
+
+
   }
   // console.log(tickersArray);
   return tickersArray;
