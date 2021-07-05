@@ -1,4 +1,4 @@
-//MODEL USING MySQL
+//TICKER MODEL USING MySQL
 
 const Sequelize= require('sequelize');
 
@@ -21,8 +21,8 @@ const Ticker = sequelize.define('ticker', {
     LAST_PRICE: Sequelize.DOUBLE, 
     VOLUME: Sequelize.DOUBLE, 
     HIGH: Sequelize.DOUBLE, 
-    LOW:Sequelize.DOUBLE
-
+    LOW:Sequelize.DOUBLE,
+    CREATE_TIME:Sequelize.DATE
 });
 
 module.exports= Ticker;

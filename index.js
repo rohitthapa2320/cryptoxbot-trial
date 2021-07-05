@@ -8,6 +8,9 @@ const sequelize= require('./utils/database');
 
 const tickerRoutes= require('./routes/tickers');
 
+const tradeRoutes= require('./routes/trades');
+
+
 //Created an express app
 const app = express();
 
@@ -15,6 +18,11 @@ const PORT = 3000;
 
 //Middleware to handle tickers requests
 app.use(tickerRoutes);
+app.use('/trades',tradeRoutes);
+
+
+
+
 
 
 //Listening on all requests
