@@ -27,24 +27,11 @@ const getTickers = async (symbols) => {
     // const newTicker= new ticker(tickerData);
 
     try {
-        //  await newTicker.save();
-
-        Ticker.create(tickerData);
-
-         tickersArray.push(tickerData);
+      Ticker.create(tickerData);
+      tickersArray.push(tickerData);
     } catch (error) {
-        console.log("Error message: ", error);
+      console.log("Error message: ", error);
     }
-
-    // Ticker.create({SYMBOL,BID, BID_SIZE, ASK, 
-    // ASK_SIZE,DAILY_CHANGE, DAILY_CHANGE_RELATIVE, LAST_PRICE, VOLUME, HIGH,LOW})
-    // .then((result) => {
-    //   console.log(result);
-    // }).catch((err) => {
-    //   console.log(err);
-    // });
-
-
   }
   console.log(tickersArray);
   return tickersArray;

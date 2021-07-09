@@ -1,8 +1,9 @@
 const express= require('express');
 const mongoose = require('mongoose');
 const {fork} = require('child_process');
-const path= require('path');
 
+const path= require('path');
+const {Worker} = require('worker_threads');
 
 const sequelize= require('./utils/database');
 
@@ -20,11 +21,6 @@ const PORT = 3000;
 app.use(tickerRoutes);
 app.use('/trades',tradeRoutes);
 
-
-
-
-
-
 //Listening on all requests
 app.use('/', (req,res,next) => {
   res.send("<h1>Hello from CryptoXBot</h1>");
@@ -34,32 +30,32 @@ app.use('/', (req,res,next) => {
 console.log("\nI am in main process\n");
 
 //Forking Child Process1
-console.log("\nChild Process1 is started\n");
-const childProcess1= fork(path.join(__dirname,'processes','process1.js'));
+// console.log("\nChild Process1 is started\n");
+// const childProcess1= fork(path.join(__dirname,'processes','process1.js'));
 
 //Forking Child Process2
-console.log("\nChild Process2 is started\n");
-let childProcess2;
-setTimeout(()=> {
-  childProcess2= fork(path.join(__dirname,'processes','process2.js'));
-  childProcess2.send("Data sent to process2 from main");
-  childProcess2.on('message', message => {
-  console.log("Message received by main from process2: ", message);
-});
+// console.log("\nChild Process2 is started\n");
+// let childProcess2;
+// setTimeout(()=> {
+//   childProcess2= fork(path.join(__dirname,'processes','process2.js'));
+//   childProcess2.send("Data sent to process2 from main");
+//   childProcess2.on('message', message => {
+//   console.log("Message received by main from process2: ", message);
+// });
 
-},2000);
+// },2000);
 // const childProcess2= fork(path.join(__dirname,'processes','process2.js'));
 
 //Sending data to child process1
-childProcess1.send("Data sent to process1 from main");
+// childProcess1.send("Data sent to process1 from main");
 
 //Sending data to child process2
 // childProcess2.send("Data sent to process2 from main");
 
 //Listening for message from child process1
-childProcess1.on('message', message => {
-  console.log("Message received by main from process1: ", message);
-});
+// childProcess1.on('message', message => {
+//   console.log("Message received by main from process1: ", message);
+// });
 
 //Listening for message from child process2
 // childProcess2.on('message', message => {
@@ -93,6 +89,44 @@ sequelize.sync().then( () => {
 // });
   });
 }).catch(err => console.log(err));
+
+//Adding workers to call socket api endpoints for tickers and trades
+
+const socketTickersWorker= new Worker(path.join(__dirname,'api','socketTickers.js'));
+
+socketTickersWorker.on('message', result => {
+  console.log("Received result from socketTickersWorker: ", result);
+});
+
+//Listening for errors
+socketTickersWorker.on('error', err => {
+  console.log("Error: ", err );
+});
+
+//Listening for socketTickersWorker thread to exit
+socketTickersWorker.on('exit', exitCode => {
+  console.log("Socket Ticker Worker Exited with code: ", exitCode);
+});
+
+socketTickersWorker.postMessage("Hi, I am index.js, sending message to Ticker WebSocket endpoint");
+
+const socketTradesWorker= new Worker(path.join(__dirname,'api','socketTrades.js'));
+
+socketTradesWorker.on('message', result => {
+  console.log("Received result from socketTradesWorker: ", result);
+});
+
+//Listening for errors
+socketTradesWorker.on('error', err => {
+  console.log("Error: ", err );
+});
+
+//Listening for socketTickersWorker thread to exit
+socketTradesWorker.on('exit', exitCode => {
+  console.log("Socket Trades Worker Exited with code: ", exitCode);
+});
+
+socketTradesWorker.postMessage("Hi, I am index.js, sending message to Trades WebSocket endpoint");
 
 
 // try {

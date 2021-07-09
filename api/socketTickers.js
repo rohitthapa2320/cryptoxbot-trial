@@ -1,7 +1,21 @@
 const ws = require('ws');
 const w = new ws('wss://api-pub.bitfinex.com/ws/2');
+const path= require('path');
 
 const Ticker= require('../models/tickers');
+
+const debugLog= require('../helpers/debugLog');
+
+debugLog.filePath= path.basename(__filename);
+
+const {parentPort} = require('worker_threads');
+
+console.log('\nWe are in Socket Tickers Worker');
+
+//Receiving message from Parent
+parentPort.on('message', message => {
+  console.log("Hi, I am Ticker Worker and I received message from parent: ", message);
+});
 
 const obj = { event: 'subscribe', channel: 'ticker', symbol: 'tBTCUSD'};
 
@@ -10,7 +24,8 @@ let msg = JSON.stringify(obj);
 // let debugCount=0;
 
 w.on('message', (message) => {
-  console.log(`Message:`, message);
+  // console.log(`Message:`, message);
+  debugLog.print(`Message:`, message);
   console.log(message.length);
   console.log(typeof(message));
 
@@ -54,6 +69,10 @@ w.on('message', (message) => {
       ASK_SIZE,DAILY_CHANGE, DAILY_CHANGE_RELATIVE, LAST_PRICE, VOLUME, HIGH,LOW, CREATE_TIME: Date.now()};
   
       console.log(`ticker Data:`, tickerData);
+
+      //Sending message to parent
+
+      parentPort.postMessage(tickerData);
 
       console.log("\nStoring in the Database\n");
 
